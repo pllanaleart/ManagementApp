@@ -2,7 +2,8 @@ package com.managementapp.managementapplication.ui.controller;
 
 import com.managementapp.managementapplication.service.ProductsService;
 import com.managementapp.managementapplication.shared.dto.ProductsDto;
-import org.springframework.stereotype.Repository;
+import com.managementapp.managementapplication.ui.response.OperationStatusModel;
+import com.managementapp.managementapplication.ui.response.ProductResponseList;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -18,10 +19,10 @@ public class ProductsController {
     }
 
     @GetMapping
-    public List<ProductsDto> getAll(@RequestParam(value = "page",defaultValue = "0")
-                                        int page,@RequestParam(value = "limit",defaultValue = "10")int limit){
+    public ProductResponseList getAll(@RequestParam(value = "page",defaultValue = "0")
+                                        int page, @RequestParam(value = "limit",defaultValue = "10")int limit){
 
-        return new ArrayList<>(productsService.getAll(page, limit));
+        return productsService.getAll(page, limit);
     }
     @GetMapping("/{id}")
     public ProductsDto findById(@PathVariable Long id){
@@ -32,5 +33,15 @@ public class ProductsController {
     public ProductsDto createProduct(@RequestBody ProductsDto productsDto){
 
         return  productsService.createProduct(productsDto);
+    }
+    @PutMapping("/{id}")
+    public ProductsDto updateProduct(@PathVariable Long id,@RequestBody ProductsDto productsDto){
+
+        return productsService.updateProduct(id,productsDto);
+    }
+    @DeleteMapping("/{id}")
+    public OperationStatusModel deleteProduct(@PathVariable Long id){
+
+        return productsService.deleteProduct(id);
     }
 }
