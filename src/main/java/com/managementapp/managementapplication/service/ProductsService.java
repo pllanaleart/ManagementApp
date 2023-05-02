@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ProductsService {
 
-    ProductResponseList getAll(int page, int limitperpage);
+    ProductResponseList getAll(int page, int limitperpage,String sortBy,String sortDir);
     ProductsDto findById(Long id);
     ProductsDto createProduct(ProductsDto productsDto);
     ProductsDto updateProduct(Long id, ProductsDto productsDto);

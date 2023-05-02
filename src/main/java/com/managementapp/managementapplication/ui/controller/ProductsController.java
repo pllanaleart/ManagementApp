@@ -19,10 +19,12 @@ public class ProductsController {
     }
 
     @GetMapping
-    public ProductResponseList getAll(@RequestParam(value = "page",defaultValue = "0")
-                                        int page, @RequestParam(value = "limit",defaultValue = "10")int limit){
+    public ProductResponseList getAll(@RequestParam(value = "page",defaultValue = "0") int page,
+                                      @RequestParam(value = "limit",defaultValue = "10")int limit,
+                                      @RequestParam(value = "sortBy",defaultValue = "id") String sortBy,
+                                      @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir){
 
-        return productsService.getAll(page, limit);
+        return productsService.getAll(page, limit, sortBy,sortDir);
     }
     @GetMapping("/{id}")
     public ProductsDto findById(@PathVariable Long id){

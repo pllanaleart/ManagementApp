@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,9 +28,12 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    public ProductResponseList getAll(int page, int limitperpage) {
+    public ProductResponseList getAll(int page, int limitperpage, String sortBy,String sortDir) {
+        Sort sort= sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
         List<ProductsDto> list = new ArrayList<>();
-        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, limitperpage);
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, limitperpage, sort);
         Page<ProductsEntity> productsEntitiesPage = productsRepository.findAll(pageable);
         List<ProductsEntity> productsEntities = productsEntitiesPage.getContent();
         for (ProductsEntity productsEntity :
@@ -42,8 +46,8 @@ public class ProductsServiceImpl implements ProductsService {
                 limitperpage,
                 productsEntitiesPage.getTotalElements(),
                 productsEntitiesPage.getTotalPages(),
-                productsEntitiesPage.isLast());
-
+                productsEntitiesPage.isLast()
+        );
         return productResponseList;
     }
 
