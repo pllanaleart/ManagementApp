@@ -1,6 +1,7 @@
 package com.managementapp.managementapplication.ui.controller;
 
 import com.managementapp.managementapplication.service.ProductsService;
+import com.managementapp.managementapplication.shared.AppConstants;
 import com.managementapp.managementapplication.shared.dto.ProductsDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
 import com.managementapp.managementapplication.ui.response.ProductResponseList;
@@ -19,10 +20,10 @@ public class ProductsController {
     }
 
     @GetMapping
-    public ProductResponseList getAll(@RequestParam(value = "page",defaultValue = "0") int page,
-                                      @RequestParam(value = "limit",defaultValue = "10")int limit,
-                                      @RequestParam(value = "sortBy",defaultValue = "id") String sortBy,
-                                      @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir){
+    public ProductResponseList getAll(@RequestParam(value = "page",defaultValue = AppConstants.DEFAULT_PAGE_NO) int page,
+                                      @RequestParam(value = "limit",defaultValue = AppConstants.DEFAULT_PAGE_SIZE)int limit,
+                                      @RequestParam(value = "sortBy",defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+                                      @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIR) String sortDir){
 
         return productsService.getAll(page, limit, sortBy,sortDir);
     }
