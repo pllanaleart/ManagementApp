@@ -44,9 +44,9 @@ public class StockServiceImpl implements StockService {
         List<StockEntity> stockEntities = entityPage.getContent();
 
         for (StockEntity stockEntity:stockEntities){
-            ProductsDto productsDto = mapper.map(stockEntity.getProductsEntity(),ProductsDto.class);
+            ProductsEntity productEntity = stockEntity.getProductsEntity();
             StockDto stockDto = mapper.map(stockEntity,StockDto.class);
-            stockDto.setProductsDto(productsDto);
+            stockDto.setProductsDto(mapper.map(productEntity ,ProductsDto.class));
             list.add(stockDto);
         }
         StockResponseList stockResponseList = new StockResponseList(list,page,limiperpage,entityPage.getTotalElements(),
