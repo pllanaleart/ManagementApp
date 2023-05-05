@@ -1,9 +1,6 @@
 package com.managementapp.managementapplication.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity(name = "products")
 public class ProductsEntity {
@@ -15,6 +12,16 @@ public class ProductsEntity {
     private String mrp;
     private Long barcodeNumber;
     private double price;
+    @OneToOne(mappedBy = "products")
+    private StockEntity stock_id;
+
+    public StockEntity getStock_id() {
+        return stock_id;
+    }
+
+    public void setStock_id(StockEntity stock_id) {
+        this.stock_id = stock_id;
+    }
 
     public Long getId() {
         return id;
