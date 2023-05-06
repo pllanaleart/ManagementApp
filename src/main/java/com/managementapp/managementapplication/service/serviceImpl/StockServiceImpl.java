@@ -14,7 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.context.support.SimpleTheme;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,25 +44,23 @@ public class StockServiceImpl implements StockService {
         List<StockEntity> stockEntities = entityPage.getContent();
 
         for (StockEntity stockEntity:stockEntities){
-            ProductsEntity productEntity = stockEntity.getProductsEntity();
             StockDto stockDto = mapper.map(stockEntity,StockDto.class);
-            stockDto.setProductsDto(mapper.map(productEntity ,ProductsDto.class));
+            stockDto.setProductsDto(mapper.map(stockEntity.getProductsEntity() ,ProductsDto.class));
             list.add(stockDto);
         }
-        StockResponseList stockResponseList = new StockResponseList(list,page,limiperpage,entityPage.getTotalElements(),
+        return new StockResponseList(list,page,limiperpage,entityPage.getTotalElements(),
                 entityPage.getTotalPages(),entityPage.isLast());
-        return stockResponseList;
+
     }
 
     @Override
     public StockDto createStock(StockDto stockDto) {
         StockEntity stockEntity = mapper.map(stockDto,StockEntity.class);
         Optional<ProductsEntity> productsEntity = productsRepository.findById(stockDto.getProductsDto().getId());
-        stockEntity.setProductsEntity(productsEntity.get());
+        stockEntity.setProductsEntity(productsEntity.stream().findFirst().get());
         StockEntity createdEntity = stockRepository.save(stockEntity);
-        ProductsEntity products = createdEntity.getProductsEntity();
         stockDto =mapper.map(createdEntity,StockDto.class);
-        stockDto.setProductsDto(mapper.map(products,ProductsDto.class));
+        stockDto.setProductsDto(mapper.map(createdEntity.getProductsEntity(),ProductsDto.class));
         return stockDto;
     }
 }
