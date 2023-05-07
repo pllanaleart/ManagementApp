@@ -80,7 +80,11 @@ public class StockServiceImpl implements StockService {
     @Override
     public StockDto updateStock(StockDto stockDto) {
 
-
-        return null;
+        StockEntity stockEntity = mapper.map(stockDto, StockEntity.class);
+        stockEntity.setProductsEntity(mapper.map(stockDto.getProductsDto(),ProductsEntity.class));
+        StockEntity stock = stockRepository.save(stockEntity);
+        StockDto returnValue = mapper.map(stock,StockDto.class);
+        returnValue.setProductsDto(mapper.map(stockEntity.getProductsEntity(),ProductsDto.class));
+        return returnValue;
     }
 }

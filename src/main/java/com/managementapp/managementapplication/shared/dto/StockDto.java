@@ -9,10 +9,14 @@ public class StockDto {
     private Long quantity;
     private String unit;
     private String type;
-    private Date date =new Date();
+    private Date date;
 
     public Date getDate() {
         return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public Long getId() {

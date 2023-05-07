@@ -16,7 +16,7 @@ public class StockEntity {
     private Long quantity;
     private String unit;
     private String type;
-    private Date date;
+    private Date date=new Date();
 
     public Date getDate() {
         return date;

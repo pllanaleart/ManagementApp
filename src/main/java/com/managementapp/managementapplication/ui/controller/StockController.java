@@ -4,7 +4,9 @@ package com.managementapp.managementapplication.ui.controller;
 import com.managementapp.managementapplication.service.StockService;
 import com.managementapp.managementapplication.shared.AppConstants;
 import com.managementapp.managementapplication.shared.dto.StockDto;
+import com.managementapp.managementapplication.ui.request.StockUpdateRequestModel;
 import com.managementapp.managementapplication.ui.response.StockResponseList;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class StockController {
 
     private StockService stockService;
+    ModelMapper mapper=new ModelMapper();
 
     @Autowired
     public StockController(StockService stockService) {
@@ -36,5 +39,13 @@ public class StockController {
     @GetMapping("/{id}")
     public StockDto findByProductId(@PathVariable Long id){
         return stockService.findByProductId(id);
+    }
+    @PutMapping("/{id}")
+    public StockDto updateStock(@RequestBody StockUpdateRequestModel updateRequestModel, @PathVariable Long id){
+        StockDto stockDto = stockService.findByProductId(id);
+        if(stockDto == null)throw new RuntimeException("Product not in stock");
+        stockDto.setType(updateRequestModel.getType());
+        stockDto.setUnit(updateRequestModel.getUnit());
+        return stockService.updateStock(stockDto);
     }
 }
