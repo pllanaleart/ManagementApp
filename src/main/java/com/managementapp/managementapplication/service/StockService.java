@@ -7,4 +7,7 @@ public interface StockService {
 
     StockResponseList getAll(int page,int limiperpage, String sortBy, String sortDir);
     StockDto createStock(StockDto stockDto);
+    StockDto findByProductId(Long id);
+
+    StockDto updateStock(StockDto stockDto);
 }

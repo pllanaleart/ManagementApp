@@ -35,32 +35,52 @@ public class StockServiceImpl implements StockService {
     @Override
     public StockResponseList getAll(int page, int limiperpage, String sortBy, String sortDir) {
 
-        Sort sort= sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())? Sort.by(sortBy).ascending()
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         ArrayList<StockDto> list = new ArrayList<>();
-        Pageable pageable = PageRequest.of(page,limiperpage,sort);
+        Pageable pageable = PageRequest.of(page, limiperpage, sort);
         Page<StockEntity> entityPage = stockRepository.findAll(pageable);
         List<StockEntity> stockEntities = entityPage.getContent();
 
-        for (StockEntity stockEntity:stockEntities){
-            StockDto stockDto = mapper.map(stockEntity,StockDto.class);
-            stockDto.setProductsDto(mapper.map(stockEntity.getProductsEntity() ,ProductsDto.class));
+        for (StockEntity stockEntity : stockEntities) {
+            StockDto stockDto = mapper.map(stockEntity, StockDto.class);
+            stockDto.setProductsDto(mapper.map(stockEntity.getProductsEntity(), ProductsDto.class));
             list.add(stockDto);
         }
-        return new StockResponseList(list,page,limiperpage,entityPage.getTotalElements(),
-                entityPage.getTotalPages(),entityPage.isLast());
+        return new StockResponseList(list, page, limiperpage, entityPage.getTotalElements(),
+                entityPage.getTotalPages(), entityPage.isLast());
 
     }
 
     @Override
     public StockDto createStock(StockDto stockDto) {
-        StockEntity stockEntity = mapper.map(stockDto,StockEntity.class);
+        StockEntity stockEntity = mapper.map(stockDto, StockEntity.class);
         Optional<ProductsEntity> productsEntity = productsRepository.findById(stockDto.getProductsDto().getId());
-        stockEntity.setProductsEntity(productsEntity.stream().findFirst().get());
+        productsEntity.ifPresent(productsEntity1 -> stockEntity.setProductsEntity(productsEntity.get()));
         StockEntity createdEntity = stockRepository.save(stockEntity);
-        stockDto =mapper.map(createdEntity,StockDto.class);
-        stockDto.setProductsDto(mapper.map(createdEntity.getProductsEntity(),ProductsDto.class));
+        stockDto = mapper.map(createdEntity, StockDto.class);
+        stockDto.setProductsDto(mapper.map(createdEntity.getProductsEntity(), ProductsDto.class));
         return stockDto;
+    }
+
+    @Override
+    public StockDto findByProductId(Long id) {
+        StockEntity stockEntity = stockRepository.findByProductsId(id);
+        if(stockEntity ==null)throw new RuntimeException("No products in that id");
+        ProductsEntity productsEntity = stockEntity.getProductsEntity();
+        if(productsEntity == null) throw new RuntimeException("No product asociated in stock");
+        ProductsDto productsDto = mapper.map(productsEntity, ProductsDto.class);
+        StockDto returnValue = mapper.map(stockEntity , StockDto.class);
+        returnValue.setProductsDto(productsDto);
+        return returnValue;
+
+    }
+
+    @Override
+    public StockDto updateStock(StockDto stockDto) {
+
+
+        return null;
     }
 }
