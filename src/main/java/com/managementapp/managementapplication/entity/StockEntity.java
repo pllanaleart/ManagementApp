@@ -13,7 +13,8 @@ public class StockEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(unique = true ,name = "product_id",referencedColumnName = "id")
     private ProductsEntity products;
-    private Long quantity;
+
+    private int quantity;
     private String unit;
     private String type;
     private Date date=new Date();
@@ -42,11 +43,19 @@ public class StockEntity {
         this.products = productsEntity;
     }
 
-    public Long getQuantity() {
+    public ProductsEntity getProducts() {
+        return products;
+    }
+
+    public void setProducts(ProductsEntity products) {
+        this.products = products;
+    }
+
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Long quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 

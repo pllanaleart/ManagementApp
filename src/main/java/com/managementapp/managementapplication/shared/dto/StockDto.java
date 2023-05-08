@@ -6,7 +6,7 @@ import java.util.Date;
 public class StockDto {
     private Long id;
     private ProductsDto productsDto;
-    private Long quantity;
+    private int quantity;
     private String unit;
     private String type;
     private Date date;
@@ -35,11 +35,11 @@ public class StockDto {
         this.productsDto = productsDto;
     }
 
-    public Long getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Long quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 

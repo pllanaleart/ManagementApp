@@ -7,6 +7,7 @@ import com.managementapp.managementapplication.repository.StockRepository;
 import com.managementapp.managementapplication.service.StockService;
 import com.managementapp.managementapplication.shared.dto.ProductsDto;
 import com.managementapp.managementapplication.shared.dto.StockDto;
+import com.managementapp.managementapplication.ui.response.OperationStatusModel;
 import com.managementapp.managementapplication.ui.response.StockResponseList;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -87,4 +88,16 @@ public class StockServiceImpl implements StockService {
         returnValue.setProductsDto(mapper.map(stockEntity.getProductsEntity(),ProductsDto.class));
         return returnValue;
     }
+
+    @Override
+    public OperationStatusModel deleteStock(StockDto stockDto) {
+        StockEntity stockEntity = mapper.map(stockDto,StockEntity.class);
+        if(stockEntity.getQuantity() == 0){
+            stockRepository.delete(stockEntity);
+        } else {
+            throw new RuntimeException("Cannot delete while you have products in stock");
+        }
+        return new OperationStatusModel("Delete","Success");
+    }
+
 }

@@ -94,7 +94,6 @@ public class ProductsServiceImpl implements ProductsService {
         ProductsDto productToDelete = findById(id);
         ProductsEntity productsEntity = mapper.map(productToDelete, ProductsEntity.class);
         productsRepository.delete(productsEntity);
-        OperationStatusModel operationStatusModel = new OperationStatusModel("delete", "success");
-        return operationStatusModel;
+        return new OperationStatusModel("delete", "success");
     }
 }
