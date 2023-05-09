@@ -52,7 +52,7 @@ public class StockController {
 
     @DeleteMapping("/{id}")
     public OperationStatusModel deleteStock(@PathVariable Long id){
-        StockDto stockDto =stockService.findByProductId(id);
+        StockDto stockDto = stockService.findByProductId(id);
         if(stockDto == null)throw new RuntimeException("Product not in stock");
         return stockService.deleteStock(stockDto);
     }

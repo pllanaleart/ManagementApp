@@ -2,6 +2,8 @@ package com.managementapp.managementapplication.entity;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity(name = "products")
 public class ProductsEntity {
     @Id
@@ -14,6 +16,16 @@ public class ProductsEntity {
     private double price;
     @OneToOne(mappedBy = "products")
     private StockEntity stock_id;
+    @OneToMany(mappedBy = "products")
+    private Set<ProductsListEntity> listEntities;
+
+    public Set<ProductsListEntity> getListEntities() {
+        return listEntities;
+    }
+
+    public void setListEntities(Set<ProductsListEntity> listEntities) {
+        this.listEntities = listEntities;
+    }
 
     public StockEntity getStock_id() {
         return stock_id;

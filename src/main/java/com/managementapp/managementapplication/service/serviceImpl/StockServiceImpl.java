@@ -68,7 +68,7 @@ public class StockServiceImpl implements StockService {
     @Override
     public StockDto findByProductId(Long id) {
         StockEntity stockEntity = stockRepository.findByProductsId(id);
-        if(stockEntity ==null)throw new RuntimeException("No products in that id");
+        if(stockEntity == null)throw new RuntimeException("No products in that id");
         ProductsEntity productsEntity = stockEntity.getProductsEntity();
         if(productsEntity == null) throw new RuntimeException("No product asociated in stock");
         ProductsDto productsDto = mapper.map(productsEntity, ProductsDto.class);
