@@ -38,50 +38,33 @@ public class InvoiceController {
     }
 
     @PostMapping
-    public InvoiceDto createInvoice(@RequestBody InvoiceRequestModel invoiceRequestModel){
-        InvoiceDto invoiceDto =mapper.map(invoiceRequestModel, InvoiceDto.class);
+    public InvoiceDto createInvoice(@RequestBody InvoiceRequestModel invoiceRequestModel) {
+        InvoiceDto invoiceDto = mapper.map(invoiceRequestModel, InvoiceDto.class);
         InvoiceDto createdInvoice = invoiceService.createInvoice(invoiceDto);
         createdInvoice.setTvsh(AppConstants.DEFAULT_TVSH);
         Set<ProductsListDto> productsListDtoSet = new HashSet<>();
-        double amount=0;
-        double totalamount=0;
-        for(InvoiceQuantityModel invoiceQuantityModel: invoiceRequestModel.getInvoiceQuantityModels()){
+        double amount = 0;
+        double totalamount = 0;
+        for (InvoiceQuantityModel invoiceQuantityModel : invoiceRequestModel.getInvoiceQuantityModels()) {
             StockDto stockDto = stockService.findByProductId(invoiceQuantityModel.getProductId());
-            if(stockDto.getQuantity()<invoiceQuantityModel.getQuantity())throw new RuntimeException(stockDto.getProductsDto().getName()+
-                    " doesnt have stock, stock left: "+stockDto.getQuantity());
-            ProductsListKey productsListKey = new ProductsListKey(createdInvoice.getId(),stockDto.getProductsDto().getId());
-            ProductsListDto productsListDto = new ProductsListDto(productsListKey , invoiceQuantityModel.getQuantity());
+            if (stockDto.getQuantity() < invoiceQuantityModel.getQuantity())
+                throw new RuntimeException(stockDto.getProductsDto().getName() +
+                        " doesnt have stock, stock left: " + stockDto.getQuantity());
+            ProductsListKey productsListKey = new ProductsListKey(createdInvoice.getId(), stockDto.getProductsDto().getId());
+            ProductsListDto productsListDto = new ProductsListDto(productsListKey, invoiceQuantityModel.getQuantity());
             ProductsListDto createdProductList = invoiceService.createProductsList(productsListDto);
             productsListDtoSet.add(createdProductList);
             amount = amount + stockDto.getProductsDto().getPrice();
-            double amountminusTVSH = (stockDto.getProductsDto().getPrice() * 1.16)-stockDto.getProductsDto().getPrice();
-            totalamount=totalamount+amountminusTVSH;
-            stockDto.setQuantity(stockDto.getQuantity()-createdProductList.getQuantity());
+            double amountminusTVSH = (stockDto.getProductsDto().getPrice() * 1.16) - stockDto.getProductsDto().getPrice();
+            totalamount = totalamount + amountminusTVSH;
+            stockDto.setQuantity(stockDto.getQuantity() - createdProductList.getQuantity());
+            stockService.updateStock(stockDto);
 
         }
         createdInvoice.setAmmount(amount);
         createdInvoice.setTotalForPayment(totalamount);
         createdInvoice.setProductsListEntities(productsListDtoSet);
 
-        return createdInvoice;
-//        double totalamount=0;
-//        double amount = 0;
-//        Set<ProductsListDto> productsListDtoSet=new HashSet<>();
-//        for (InvoiceQuantityModel quantityModel: invoiceRequestModel.getInvoiceQuantityModels()
-//             ) {
-//            StockDto stockDto = stockService.findByProductId(quantityModel.getProductId());
-//            if(stockDto.getQuantity()<quantityModel.getQuantity())throw new RuntimeException(stockDto.getProductsDto().getName()+
-//                    " doesnt have stock, stock left: "+stockDto.getQuantity());
-//            ProductsListKey productsListKey = new ProductsListKey(invoiceDto.getId(),quantityModel.getProductId());
-//            ProductsListDto productsListDto = new ProductsListDto(productsListKey , quantityModel.getQuantity());
-//            productsListDtoSet.add(productsListDto);
-//            amount = amount + stockDto.getProductsDto().getPrice();
-//            double amountminusTVSH = (stockDto.getProductsDto().getPrice() * 1.16)-stockDto.getProductsDto().getPrice();
-//            totalamount=totalamount+amountminusTVSH;
-//        }
-//        invoiceDto.setAmmount(amount);
-//        invoiceDto.setTotalForPayment(totalamount);
-//        invoiceDto.setProductsListEntities(productsListDtoSet);
-//        return invoiceService.createInvoice(invoiceDto);
+        return invoiceService.createInvoice(createdInvoice);
     }
 }

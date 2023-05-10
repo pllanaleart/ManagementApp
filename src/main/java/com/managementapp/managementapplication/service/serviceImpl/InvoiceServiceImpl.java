@@ -1,6 +1,7 @@
 package com.managementapp.managementapplication.service.serviceImpl;
 
 import com.managementapp.managementapplication.entity.InvoiceEntity;
+import com.managementapp.managementapplication.entity.ProductsEntity;
 import com.managementapp.managementapplication.entity.ProductsListEntity;
 import com.managementapp.managementapplication.repository.InvoiceRepository;
 import com.managementapp.managementapplication.repository.ProductsListRepository;
@@ -30,9 +31,25 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public InvoiceDto createInvoice(InvoiceDto invoiceDto) {
-        InvoiceEntity invoiceEntity = mapper.map(invoiceDto, InvoiceEntity.class);
+        InvoiceEntity invoiceEntity = new InvoiceEntity();
+        invoiceEntity.setId(invoiceDto.getId());
+        invoiceEntity.setTvsh(invoiceDto.getTvsh());
+        invoiceEntity.setAmmount(invoiceDto.getAmmount());
+        invoiceEntity.setInvoiceNo(invoiceDto.getInvoiceNo());
+        invoiceEntity.setTotalForPayment(invoiceDto.getTotalForPayment());
         InvoiceEntity createdEntity = invoiceRepository.save(invoiceEntity);
-        return mapper.map(createdEntity,InvoiceDto.class);
+        InvoiceDto returnValue = mapper.map(createdEntity,InvoiceDto.class);
+        Set<ProductsListEntity> productListEntitySet = productsListRepository.findAllByInvoiceEntity(createdEntity);
+        Set<ProductsListDto>  productsListDtoSet = new HashSet<>();
+        if(productListEntitySet.isEmpty()) {
+            return returnValue;
+        }
+        createdEntity.setListEntities(productListEntitySet);
+        for (ProductsListEntity tempList:productListEntitySet){
+            productsListDtoSet.add(mapper.map(tempList, ProductsListDto.class));
+        }
+        returnValue.setProductsListEntities(productsListDtoSet);
+        return returnValue;
     }
 
     @Override
@@ -54,6 +71,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceEntity.setInvoiceNo(invoiceDto.getInvoiceNo());
         invoiceEntity.setTotalForPayment(invoiceDto.getTotalForPayment());
         invoiceEntity.setAmmount(invoiceEntity.getAmmount());
+
         return null;
     }
 }
