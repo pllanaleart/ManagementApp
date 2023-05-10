@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -31,12 +32,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public InvoiceDto createInvoice(InvoiceDto invoiceDto) {
-        InvoiceEntity invoiceEntity = new InvoiceEntity();
-        invoiceEntity.setId(invoiceDto.getId());
-        invoiceEntity.setTvsh(invoiceDto.getTvsh());
-        invoiceEntity.setAmmount(invoiceDto.getAmmount());
-        invoiceEntity.setInvoiceNo(invoiceDto.getInvoiceNo());
-        invoiceEntity.setTotalForPayment(invoiceDto.getTotalForPayment());
+        InvoiceEntity invoiceEntity = mapper.map(invoiceDto, InvoiceEntity.class);
         InvoiceEntity createdEntity = invoiceRepository.save(invoiceEntity);
         InvoiceDto returnValue = mapper.map(createdEntity,InvoiceDto.class);
         Set<ProductsListEntity> productListEntitySet = productsListRepository.findAllByInvoiceEntity(createdEntity);
@@ -65,13 +61,16 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
-        InvoiceEntity invoiceEntity = new InvoiceEntity();
-        invoiceEntity.setTvsh(invoiceDto.getTvsh());
-        invoiceEntity.setInvoiceNo(invoiceDto.getInvoiceNo());
-        invoiceEntity.setTotalForPayment(invoiceDto.getTotalForPayment());
-        invoiceEntity.setAmmount(invoiceEntity.getAmmount());
-
-        return null;
+    public InvoiceDto findByInvoiceId(Long id) {
+        Optional<InvoiceEntity> foundInvoice = invoiceRepository.findById(id);
+        Set<ProductsListEntity> productListEntitySet = new HashSet<>();
+        Set<ProductsListDto> productsListDtoSet = new HashSet<>();
+        InvoiceDto invoiceDto = mapper.map(foundInvoice.get() ,InvoiceDto.class);
+        productListEntitySet =productsListRepository.findAllByInvoiceEntity(foundInvoice.get());
+        for(ProductsListEntity productsListEntity: productListEntitySet){
+            productsListDtoSet.add(mapper.map(productsListEntity, ProductsListDto.class));
+        }
+        invoiceDto.setProductsListEntities(productsListDtoSet);
+        return invoiceDto;
     }
 }

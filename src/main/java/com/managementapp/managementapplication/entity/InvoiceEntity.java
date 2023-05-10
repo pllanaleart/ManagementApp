@@ -2,9 +2,8 @@ package com.managementapp.managementapplication.entity;
 
 import jakarta.persistence.*;
 
-import java.text.SimpleDateFormat;
+
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity(name = "invoice")
