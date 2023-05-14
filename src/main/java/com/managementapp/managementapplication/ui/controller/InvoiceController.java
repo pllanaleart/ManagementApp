@@ -11,14 +11,12 @@ import com.managementapp.managementapplication.ui.request.InvoiceQuantityModel;
 import com.managementapp.managementapplication.ui.request.InvoiceRequestModel;
 import com.managementapp.managementapplication.ui.response.InvoiceResponseModel;
 import com.managementapp.managementapplication.ui.response.PoductQuantityModel;
-import com.managementapp.managementapplication.ui.response.ProductResponseList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.Buffer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,51 +45,61 @@ public class InvoiceController {
     @PostMapping
     public InvoiceResponseModel createInvoice(@RequestBody InvoiceRequestModel invoiceRequestModel) {
         InvoiceDto invoiceDto = mapper.map(invoiceRequestModel, InvoiceDto.class);
-        InvoiceDto createdInvoice = invoiceService.createInvoice(invoiceDto);
-        createdInvoice.setTvsh(AppConstants.DEFAULT_TVSH);
-        double amount = 0;
-        double totalamount = 0;
+        Set<ProductsListDto> createdSet = new HashSet<>();
         for (InvoiceQuantityModel invoiceQuantityModel : invoiceRequestModel.getInvoiceQuantityModels()) {
             StockDto stockDto = stockService.findByProductId(invoiceQuantityModel.getProductId());
             if (stockDto.getQuantity() < invoiceQuantityModel.getQuantity())
                 throw new RuntimeException(stockDto.getProductsDto().getName() +
                         " doesnt have stock, stock left: " + stockDto.getQuantity());
-            ProductsListKey productsListKey = new ProductsListKey(createdInvoice.getId(), stockDto.getProductsDto().getId());
+            ProductsListKey productsListKey = new ProductsListKey();
+            productsListKey.setProduct_id(stockDto.getProductsDto().getId());
             ProductsListDto productsListDto = new ProductsListDto(productsListKey, invoiceQuantityModel.getQuantity());
-            ProductsListDto createdProductList = invoiceService.createProductsList(productsListDto);
-            double TVSHofAmount = (stockDto.getProductsDto().getPrice() * AppConstants.DEFAULT_TVSH) / 100;
-            double productAmountwithTVSH = (stockDto.getProductsDto().getPrice() + TVSHofAmount) * invoiceQuantityModel.getQuantity();
-            amount = amount + (stockDto.getProductsDto().getPrice() * invoiceQuantityModel.getQuantity());
-            totalamount = totalamount + productAmountwithTVSH;
-            BigDecimal formater = new BigDecimal(amount).setScale(2, RoundingMode.HALF_UP);
-            BigDecimal formater2 = new BigDecimal(totalamount).setScale(2, RoundingMode.HALF_UP);
-            amount = formater.doubleValue();
-            totalamount = formater2.doubleValue();
-            stockDto.setQuantity(stockDto.getQuantity() - createdProductList.getQuantity());
+            createdSet.add(productsListDto);
+            stockDto.setQuantity(stockDto.getQuantity() - productsListDto.getQuantity());
             stockService.updateStock(stockDto);
         }
-        createdInvoice.setAmmount(amount);
-        createdInvoice.setTotalForPayment(totalamount);
+        InvoiceDto createdInvoice = invoiceService.createInvoice(invoiceDto);
+        for (ProductsListDto productsListDto : createdSet) {
+            productsListDto.getId().setInvoice_id(createdInvoice.getId());
+
+        }
+        createdInvoice.setProductsListDtos(createdSet);
+        createdInvoice = invoiceCalculation(createdInvoice);
         createdInvoice = invoiceService.createInvoice(createdInvoice);
 
         return createinvoiceResponseModel(createdInvoice);
     }
 
-    private InvoiceResponseModel createinvoiceResponseModel(InvoiceDto invoiceDto){
+    @PutMapping("/{id}")
+    public InvoiceResponseModel updateInvoice(@PathVariable Long id, @RequestBody InvoiceDto invoiceDto) {
+        InvoiceDto foundInvoice = invoiceService.findByInvoiceId(id);
+        if (foundInvoice == null) throw new RuntimeException("Invoice not found");
+        invoiceDto.setId(foundInvoice.getId());
+        InvoiceDto updatedInvoice = new InvoiceDto();
+        if (invoiceDto.getProductsListDtos() == null) {
+            updatedInvoice = invoiceService.updateInvoice(invoiceDto);
+        } else {
+            invoiceDto = invoiceCalculation(invoiceDto);
+        }
+        updatedInvoice= invoiceService.updateInvoice(invoiceDto);
+        return createinvoiceResponseModel(updatedInvoice);
+    }
+
+    private InvoiceResponseModel createinvoiceResponseModel(InvoiceDto invoiceDto) {
         InvoiceResponseModel responseModel = new InvoiceResponseModel();
         responseModel.setInvoiceNo(invoiceDto.getInvoiceNo());
         responseModel.setAmmount(invoiceDto.getAmmount());
         responseModel.setTvsh(invoiceDto.getTvsh());
         responseModel.setTotalForPayment(invoiceDto.getTotalForPayment());
         Set<PoductQuantityModel> quantityModelSet = new HashSet<>();
-        for(ProductsListDto productResponseList : invoiceDto.getProductsListEntities()){
+        for (ProductsListDto productResponseList : invoiceDto.getProductsListDtos()) {
             Long productId = productResponseList.getId().getProduct_id();
             StockDto stockDto = stockService.findByProductId(productId);
             PoductQuantityModel product = new PoductQuantityModel();
             double TVSHofAmount = (stockDto.getProductsDto().getPrice() * AppConstants.DEFAULT_TVSH) / 100;
             double productAmountwithTVSH = (stockDto.getProductsDto().getPrice() + TVSHofAmount) * productResponseList.getQuantity();
-            TVSHofAmount = new BigDecimal(TVSHofAmount).setScale(2,RoundingMode.HALF_UP).doubleValue();
-            productAmountwithTVSH = new BigDecimal(productAmountwithTVSH).setScale(2,RoundingMode.HALF_UP).doubleValue();
+            TVSHofAmount = new BigDecimal(TVSHofAmount).setScale(2, RoundingMode.HALF_UP).doubleValue();
+            productAmountwithTVSH = new BigDecimal(productAmountwithTVSH).setScale(2, RoundingMode.HALF_UP).doubleValue();
             product.setName(stockDto.getProductsDto().getName());
             product.setPrice(stockDto.getProductsDto().getPrice());
             product.setProductTotal(productAmountwithTVSH);
@@ -101,5 +109,23 @@ public class InvoiceController {
         }
         responseModel.setProducts(quantityModelSet);
         return responseModel;
+    }
+
+    private InvoiceDto invoiceCalculation(InvoiceDto invoiceDto) {
+        double amuntMinusTVSH = 0;
+        double totalamount = 0;
+        for (ProductsListDto productsListDto : invoiceDto.getProductsListDtos()) {
+            StockDto stockDto = stockService.findByProductId(productsListDto.getId().getProduct_id());
+            double TVSHofAmount = (stockDto.getProductsDto().getPrice() * AppConstants.DEFAULT_TVSH) / 100;
+            double productAmountwithTVSH = (stockDto.getProductsDto().getPrice() + TVSHofAmount) * productsListDto.getQuantity();
+            amuntMinusTVSH = amuntMinusTVSH + (stockDto.getProductsDto().getPrice() * productsListDto.getQuantity());
+            totalamount = totalamount + productAmountwithTVSH;
+            amuntMinusTVSH = new BigDecimal(amuntMinusTVSH).setScale(2, RoundingMode.HALF_UP).doubleValue();
+            totalamount = new BigDecimal(totalamount).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        }
+        invoiceDto.setAmmount(amuntMinusTVSH);
+        invoiceDto.setTvsh(AppConstants.DEFAULT_TVSH);
+        invoiceDto.setTotalForPayment(totalamount);
+        return invoiceDto;
     }
 }

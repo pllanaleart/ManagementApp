@@ -13,7 +13,8 @@ public class InvoiceDto {
     private double ammount;
     private double tvsh;
     private double totalForPayment;
-    private Set<ProductsListDto> productsListEntities;
+    private Date dateCreated;
+    private Set<ProductsListDto> productsListDtos;
     public Long getId() {
         return id;
     }
@@ -54,11 +55,19 @@ public class InvoiceDto {
         this.totalForPayment = totalForPayment;
     }
 
-    public Set<ProductsListDto> getProductsListEntities() {
-        return productsListEntities;
+    public Set<ProductsListDto> getProductsListDtos() {
+        return productsListDtos;
     }
 
-    public void setProductsListEntities(Set<ProductsListDto> productsListEntities) {
-        this.productsListEntities = productsListEntities;
+    public void setProductsListDtos(Set<ProductsListDto> productsListDtos) {
+        this.productsListDtos = productsListDtos;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }

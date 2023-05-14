@@ -1,11 +1,13 @@
 package com.managementapp.managementapplication.service.serviceImpl;
 
+import com.managementapp.managementapplication.embededKeys.ProductsListKey;
 import com.managementapp.managementapplication.entity.InvoiceEntity;
-import com.managementapp.managementapplication.entity.ProductsEntity;
 import com.managementapp.managementapplication.entity.ProductsListEntity;
 import com.managementapp.managementapplication.repository.InvoiceRepository;
 import com.managementapp.managementapplication.repository.ProductsListRepository;
 import com.managementapp.managementapplication.service.InvoiceService;
+import com.managementapp.managementapplication.shared.AppConstants;
+import com.managementapp.managementapplication.shared.Mapper.InvoiceMapper;
 import com.managementapp.managementapplication.shared.dto.InvoiceDto;
 import com.managementapp.managementapplication.shared.dto.ProductsListDto;
 import org.modelmapper.ModelMapper;
@@ -32,20 +34,15 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public InvoiceDto createInvoice(InvoiceDto invoiceDto) {
-        InvoiceEntity invoiceEntity = mapper.map(invoiceDto, InvoiceEntity.class);
-        InvoiceEntity createdEntity = invoiceRepository.save(invoiceEntity);
-        InvoiceDto returnValue = mapper.map(createdEntity,InvoiceDto.class);
-        Set<ProductsListEntity> productListEntitySet = productsListRepository.findAllByInvoiceEntity(createdEntity);
-        Set<ProductsListDto>  productsListDtoSet = new HashSet<>();
-        if(productListEntitySet.isEmpty()) {
-            return returnValue;
+        if (invoiceDto.getProductsListDtos() == null) {
+            InvoiceEntity invoiceEntity = InvoiceMapper.convertToEntity(invoiceDto);
+            InvoiceEntity createdEntity = invoiceRepository.save(invoiceEntity);
+            return InvoiceMapper.convertToDto(createdEntity);
+        } else {
+           InvoiceEntity invoiceEntity = InvoiceMapper.convertToEntity(invoiceDto);
+           productsListRepository.saveAll(invoiceEntity.getListEntities());
+            return InvoiceMapper.convertToDto(invoiceRepository.save(invoiceEntity));
         }
-        createdEntity.setListEntities(productListEntitySet);
-        for (ProductsListEntity tempList:productListEntitySet){
-            productsListDtoSet.add(mapper.map(tempList, ProductsListDto.class));
-        }
-        returnValue.setProductsListEntities(productsListDtoSet);
-        return returnValue;
     }
 
     @Override
@@ -63,15 +60,38 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public InvoiceDto findByInvoiceId(Long id) {
         Optional<InvoiceEntity> foundInvoice = invoiceRepository.findById(id);
-        Set<ProductsListEntity> productListEntitySet = new HashSet<>();
-        Set<ProductsListDto> productsListDtoSet = new HashSet<>();
-        InvoiceDto invoiceDto = mapper.map(foundInvoice.get() ,InvoiceDto.class);
-        productListEntitySet =productsListRepository.findAllByInvoiceEntity(foundInvoice.get());
-        for(ProductsListEntity productsListEntity: productListEntitySet){
-            productsListDtoSet.add(mapper.map(productsListEntity, ProductsListDto.class));
+        if (foundInvoice.isPresent()) {
+            return InvoiceMapper.convertToDto(foundInvoice.get());
+        } else throw new RuntimeException("Not found");
+    }
+
+    @Override
+    public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
+
+        InvoiceDto foundInvoiceDto = findByInvoiceId(invoiceDto.getId());
+        InvoiceEntity returnEntity = new InvoiceEntity();
+        InvoiceEntity updatedEntity = new InvoiceEntity();
+        if(foundInvoiceDto != null){
+            returnEntity= InvoiceMapper.convertToEntity(foundInvoiceDto);
         }
-        invoiceDto.setProductsListEntities(productsListDtoSet);
-        return invoiceDto;
+        if(invoiceDto.getProductsListDtos() != null){
+            productsListRepository.deleteAll(returnEntity.getListEntities());
+            productsListRepository.saveAll(InvoiceMapper.convertToEntity(invoiceDto).getListEntities());
+        }
+        returnEntity = InvoiceMapper.convertToEntity(invoiceDto);
+        updatedEntity= invoiceRepository.save(returnEntity);
+
+        return InvoiceMapper.convertToDto(updatedEntity);
+    }
+
+    @Override
+    public ProductsListDto findById(ProductsListKey productsListKey) {
+        Optional<ProductsListEntity> productsListEntity = productsListRepository.findById(productsListKey);
+        ProductsListDto productsListDto = new ProductsListDto();
+        if (productsListEntity.isPresent()) {
+            productsListDto = mapper.map(productsListEntity.get(), ProductsListDto.class);
+        } else throw new RuntimeException("not found");
+        return productsListDto;
     }
 
 }
