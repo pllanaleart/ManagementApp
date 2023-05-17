@@ -8,4 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface InvoiceRepository extends JpaRepository<InvoiceEntity,Long> {
+
+    InvoiceEntity findInvoiceEntityById(Long id);
 }

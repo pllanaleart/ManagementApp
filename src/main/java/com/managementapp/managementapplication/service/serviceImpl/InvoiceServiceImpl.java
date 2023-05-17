@@ -68,20 +68,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
 
-        InvoiceDto foundInvoiceDto = findByInvoiceId(invoiceDto.getId());
-        InvoiceEntity returnEntity = new InvoiceEntity();
-        InvoiceEntity updatedEntity = new InvoiceEntity();
-        if(foundInvoiceDto != null){
-            returnEntity= InvoiceMapper.convertToEntity(foundInvoiceDto);
+        InvoiceEntity foundInvoice = invoiceRepository.findInvoiceEntityById(invoiceDto.getId());
+        if(foundInvoice.getId().equals(invoiceDto.getId())){
+            foundInvoice = InvoiceMapper.combineEntityWithDto(invoiceDto,foundInvoice);
         }
-        if(invoiceDto.getProductsListDtos() != null){
-            productsListRepository.deleteAll(returnEntity.getListEntities());
-            productsListRepository.saveAll(InvoiceMapper.convertToEntity(invoiceDto).getListEntities());
-        }
-        returnEntity = InvoiceMapper.convertToEntity(invoiceDto);
-        updatedEntity= invoiceRepository.save(returnEntity);
-
-        return InvoiceMapper.convertToDto(updatedEntity);
+        InvoiceEntity savedEntity = invoiceRepository.save(foundInvoice);
+        return InvoiceMapper.convertToDto(savedEntity);
     }
 
     @Override

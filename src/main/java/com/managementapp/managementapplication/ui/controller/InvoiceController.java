@@ -71,17 +71,18 @@ public class InvoiceController {
     }
 
     @PutMapping("/{id}")
-    public InvoiceResponseModel updateInvoice(@PathVariable Long id, @RequestBody InvoiceDto invoiceDto) {
+    public InvoiceResponseModel updateInvoice(@PathVariable Long id, @RequestBody InvoiceDto updatedDto) {
         InvoiceDto foundInvoice = invoiceService.findByInvoiceId(id);
         if (foundInvoice == null) throw new RuntimeException("Invoice not found");
-        invoiceDto.setId(foundInvoice.getId());
+        updatedDto.setId(foundInvoice.getId());
         InvoiceDto updatedInvoice = new InvoiceDto();
-        if (invoiceDto.getProductsListDtos() == null) {
-            updatedInvoice = invoiceService.updateInvoice(invoiceDto);
+        if (updatedDto.getProductsListDtos() == null) {
+            updatedInvoice = invoiceService.updateInvoice(updatedDto);
         } else {
-            invoiceDto = invoiceCalculation(invoiceDto);
+            invoiceCalculation(updatedDto);
+            updatedInvoice= invoiceService.updateInvoice(updatedDto);
         }
-        updatedInvoice= invoiceService.updateInvoice(invoiceDto);
+
         return createinvoiceResponseModel(updatedInvoice);
     }
 
