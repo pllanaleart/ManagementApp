@@ -87,20 +87,20 @@ public class InvoiceMapper {
     }
 
     public static InvoiceEntity combineEntityWithDto(InvoiceDto invoiceDto, InvoiceEntity invoiceEntity) {
-        InvoiceDto dto = new InvoiceDto();
+
         if (invoiceDto.getId() != null) {
             invoiceEntity.setId(invoiceDto.getId());
         }
         if (invoiceDto.getInvoiceNo() != null) {
             invoiceEntity.setInvoiceNo(invoiceDto.getInvoiceNo());
         }
-        if (invoiceDto.getAmmount() != 0.0) {
+        if (invoiceDto.getAmmount() != 0) {
             invoiceEntity.setAmmount(invoiceDto.getAmmount());
         }
-        if (invoiceDto.getTvsh() != 0.0) {
+        if (invoiceDto.getTvsh() != 0) {
             invoiceEntity.setTvsh(invoiceDto.getTvsh());
         }
-        if (invoiceDto.getTotalForPayment() != 0.0) {
+        if (invoiceDto.getTotalForPayment() != 0) {
             invoiceEntity.setTotalForPayment(invoiceDto.getTotalForPayment());
         }
         if (invoiceDto.getDateCreated() != null) {

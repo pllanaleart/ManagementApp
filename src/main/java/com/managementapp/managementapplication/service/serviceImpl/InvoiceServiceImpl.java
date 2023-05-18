@@ -69,9 +69,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
 
         InvoiceEntity foundInvoice = invoiceRepository.findInvoiceEntityById(invoiceDto.getId());
-        if(foundInvoice.getId().equals(invoiceDto.getId())){
-            foundInvoice = InvoiceMapper.combineEntityWithDto(invoiceDto,foundInvoice);
+
+        if(foundInvoice.getId().equals(invoiceDto.getId()) && invoiceDto.getProductsListDtos() != null){
+            productsListRepository.deleteAll(foundInvoice.getListEntities());
+            InvoiceMapper.combineEntityWithDto(invoiceDto,foundInvoice);
+            productsListRepository.saveAll(foundInvoice.getListEntities());
         }
+        InvoiceMapper.combineEntityWithDto(invoiceDto,foundInvoice);
         InvoiceEntity savedEntity = invoiceRepository.save(foundInvoice);
         return InvoiceMapper.convertToDto(savedEntity);
     }
