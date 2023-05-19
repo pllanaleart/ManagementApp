@@ -3,9 +3,12 @@ package com.managementapp.managementapplication.service.serviceImpl;
 import com.managementapp.managementapplication.embededKeys.ProductsListKey;
 import com.managementapp.managementapplication.entity.InvoiceEntity;
 import com.managementapp.managementapplication.entity.ProductsListEntity;
+import com.managementapp.managementapplication.entity.StockEntity;
 import com.managementapp.managementapplication.repository.InvoiceRepository;
 import com.managementapp.managementapplication.repository.ProductsListRepository;
+import com.managementapp.managementapplication.repository.StockRepository;
 import com.managementapp.managementapplication.service.InvoiceService;
+import com.managementapp.managementapplication.service.StockService;
 import com.managementapp.managementapplication.shared.AppConstants;
 import com.managementapp.managementapplication.shared.Mapper.InvoiceMapper;
 import com.managementapp.managementapplication.shared.dto.InvoiceDto;
@@ -23,12 +26,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private InvoiceRepository invoiceRepository;
     private ProductsListRepository productsListRepository;
+    private StockRepository stockRepository;
     ModelMapper mapper = new ModelMapper();
 
     @Autowired
-    public InvoiceServiceImpl(InvoiceRepository invoiceRepository, ProductsListRepository productsListRepository) {
+    public InvoiceServiceImpl(InvoiceRepository invoiceRepository, ProductsListRepository productsListRepository,StockRepository stockRepository) {
         this.invoiceRepository = invoiceRepository;
         this.productsListRepository = productsListRepository;
+        this.stockRepository = stockRepository;
     }
 
 
@@ -69,8 +74,23 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
 
         InvoiceEntity foundInvoice = invoiceRepository.findInvoiceEntityById(invoiceDto.getId());
-
+        Set<StockEntity> oldStock = new HashSet<>();
         if(foundInvoice.getId().equals(invoiceDto.getId()) && invoiceDto.getProductsListDtos() != null){
+            for(ProductsListEntity productsList : foundInvoice.getListEntities()){
+                StockEntity stock = stockRepository.findByProductsId(productsList.getProducts().getId());
+                oldStock.add(stock);
+                stock.setQuantity(stock.getQuantity() + productsList.getQuantity());
+                stockRepository.save(stock);
+            }
+            for(ProductsListDto productsListDto : invoiceDto.getProductsListDtos()){
+                StockEntity newStock = stockRepository.findByProductsId(productsListDto.getId().getProduct_id());
+                if(newStock.getQuantity()<productsListDto.getQuantity()) {
+                    stockRepository.saveAll(oldStock);
+                    throw new RuntimeException("Not enugh stock for product with id: " + productsListDto.getId().getProduct_id());
+                }
+                newStock.setQuantity(newStock.getQuantity() - productsListDto.getQuantity());
+                stockRepository.save(newStock);
+            }
             productsListRepository.deleteAll(foundInvoice.getListEntities());
             InvoiceMapper.combineEntityWithDto(invoiceDto,foundInvoice);
             productsListRepository.saveAll(foundInvoice.getListEntities());
