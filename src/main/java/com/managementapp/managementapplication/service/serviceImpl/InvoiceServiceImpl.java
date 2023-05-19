@@ -16,10 +16,9 @@ import com.managementapp.managementapplication.shared.dto.ProductsListDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
@@ -71,21 +70,19 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public InvoiceDto updateInvoice(InvoiceDto invoiceDto) {
 
         InvoiceEntity foundInvoice = invoiceRepository.findInvoiceEntityById(invoiceDto.getId());
-        Set<StockEntity> oldStock = new HashSet<>();
         if(foundInvoice.getId().equals(invoiceDto.getId()) && invoiceDto.getProductsListDtos() != null){
             for(ProductsListEntity productsList : foundInvoice.getListEntities()){
                 StockEntity stock = stockRepository.findByProductsId(productsList.getProducts().getId());
-                oldStock.add(stock);
                 stock.setQuantity(stock.getQuantity() + productsList.getQuantity());
                 stockRepository.save(stock);
             }
             for(ProductsListDto productsListDto : invoiceDto.getProductsListDtos()){
                 StockEntity newStock = stockRepository.findByProductsId(productsListDto.getId().getProduct_id());
                 if(newStock.getQuantity()<productsListDto.getQuantity()) {
-                    stockRepository.saveAll(oldStock);
                     throw new RuntimeException("Not enugh stock for product with id: " + productsListDto.getId().getProduct_id());
                 }
                 newStock.setQuantity(newStock.getQuantity() - productsListDto.getQuantity());
