@@ -12,6 +12,7 @@ import com.managementapp.managementapplication.shared.Mapper.InvoiceMapper;
 import com.managementapp.managementapplication.shared.dto.InvoiceDto;
 import com.managementapp.managementapplication.shared.dto.ProductsListDto;
 import com.managementapp.managementapplication.ui.response.InvoiceTransferList;
+import com.managementapp.managementapplication.ui.response.OperationStatusModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -116,6 +117,22 @@ public class InvoiceServiceImpl implements InvoiceService {
         InvoiceMapper.combineEntityWithDto(invoiceDto, foundInvoice);
         InvoiceEntity savedEntity = invoiceRepository.save(foundInvoice);
         return InvoiceMapper.convertToDto(savedEntity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OperationStatusModel deleteInvoice(InvoiceDto invoiceDto) {
+        InvoiceEntity invoiceEntity = InvoiceMapper.convertToEntity(invoiceDto);
+
+        for(ProductsListEntity productsList : invoiceEntity.getListEntities()){
+            StockEntity stock = stockRepository.findByProductsId(productsList.getId().getProduct_id());
+            stock.setQuantity(productsList.getQuantity()+stock.getQuantity());
+            stockRepository.save(stock);
+            productsListRepository.delete(productsList);
+        }
+        invoiceRepository.deleteById(invoiceDto.getId());
+
+        return new OperationStatusModel("Delete","Success");
     }
 
     @Override

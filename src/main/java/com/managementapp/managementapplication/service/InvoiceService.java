@@ -6,6 +6,7 @@ import com.managementapp.managementapplication.shared.dto.InvoiceDto;
 import com.managementapp.managementapplication.shared.dto.ProductsListDto;
 import com.managementapp.managementapplication.ui.response.InvoiceResponseList;
 import com.managementapp.managementapplication.ui.response.InvoiceTransferList;
+import com.managementapp.managementapplication.ui.response.OperationStatusModel;
 
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ public interface InvoiceService {
     ProductsListDto createProductsList(ProductsListDto productsListDto);
     InvoiceDto findByInvoiceId(Long id);
     InvoiceDto updateInvoice(InvoiceDto invoiceDto);
+    OperationStatusModel deleteInvoice(InvoiceDto invoiceDto);
 
     ProductsListDto findById(ProductsListKey productsListKey);
 
