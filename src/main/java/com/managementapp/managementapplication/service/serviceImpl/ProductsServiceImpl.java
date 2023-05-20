@@ -28,26 +28,17 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    public ProductResponseList getAll(int page, int limitperpage, String sortBy,String sortDir) {
-        Sort sort= sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+    public ProductResponseList getAll(int page, int limitperpage, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
         List<ProductsDto> list = new ArrayList<>();
         org.springframework.data.domain.Pageable pageable = PageRequest.of(page, limitperpage, sort);
         Page<ProductsEntity> productsEntitiesPage = productsRepository.findAll(pageable);
         List<ProductsEntity> productsEntities = productsEntitiesPage.getContent();
-        for (ProductsEntity productsEntity :
-                productsEntities) {
+        for (ProductsEntity productsEntity : productsEntities) {
             list.add(mapper.map(productsEntity, ProductsDto.class));
         }
-        ProductResponseList productResponseList = new ProductResponseList(
-                list,
-                page,
-                limitperpage,
-                productsEntitiesPage.getTotalElements(),
-                productsEntitiesPage.getTotalPages(),
-                productsEntitiesPage.isLast()
-        );
+        ProductResponseList productResponseList = new ProductResponseList(list, page, limitperpage, productsEntitiesPage.getTotalElements(), productsEntitiesPage.getTotalPages(), productsEntitiesPage.isLast());
         return productResponseList;
     }
 

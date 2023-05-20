@@ -3,7 +3,6 @@ package com.managementapp.managementapplication.shared.dto;
 import com.managementapp.managementapplication.entity.ProductsListEntity;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 public class InvoiceDto {

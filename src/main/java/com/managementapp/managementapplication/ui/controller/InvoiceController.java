@@ -9,7 +9,9 @@ import com.managementapp.managementapplication.shared.dto.ProductsListDto;
 import com.managementapp.managementapplication.shared.dto.StockDto;
 import com.managementapp.managementapplication.ui.request.InvoiceQuantityModel;
 import com.managementapp.managementapplication.ui.request.InvoiceRequestModel;
+import com.managementapp.managementapplication.ui.response.InvoiceResponseList;
 import com.managementapp.managementapplication.ui.response.InvoiceResponseModel;
+import com.managementapp.managementapplication.ui.response.InvoiceTransferList;
 import com.managementapp.managementapplication.ui.response.PoductQuantityModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -36,11 +40,33 @@ public class InvoiceController {
         this.stockService = stockService;
     }
 
+    @GetMapping
+    public InvoiceResponseList findAll(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NO) int page,
+                                       @RequestParam(value = "limit", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int limit,
+                                       @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+                                       @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIR) String sortDir) {
+        InvoiceTransferList invoiceTransferList = invoiceService.findAll(page, limit, sortBy, sortDir);
+        InvoiceResponseList invoiceResponseList = new InvoiceResponseList();
+        invoiceResponseList.setPageNo(page);
+        invoiceResponseList.setPageSize(limit);
+        invoiceResponseList.setTotalElements(invoiceTransferList.getTotalElements());
+        invoiceResponseList.setTotalPages(invoiceTransferList.getTotalPages());
+        invoiceResponseList.setLast(invoiceTransferList.isLast());
+        List<InvoiceResponseModel> invoiceResponseModels = new ArrayList<>();
+        for (InvoiceDto invoiceDto : invoiceTransferList.getContent()) {
+            InvoiceResponseModel invoiceResponseModel = createinvoiceResponseModel(invoiceDto);
+            invoiceResponseModels.add(invoiceResponseModel);
+        }
+        invoiceResponseList.setContent(invoiceResponseModels);
+        return invoiceResponseList;
+    }
+
     @GetMapping("/{id}")
     public InvoiceResponseModel findById(@PathVariable Long id) {
 
         return createinvoiceResponseModel(invoiceService.findByInvoiceId(id));
     }
+
 
     @PostMapping
     public InvoiceResponseModel createInvoice(@RequestBody InvoiceRequestModel invoiceRequestModel) {
@@ -80,7 +106,7 @@ public class InvoiceController {
             updatedInvoice = invoiceService.updateInvoice(updatedDto);
         } else {
             invoiceCalculation(updatedDto);
-            updatedInvoice= invoiceService.updateInvoice(updatedDto);
+            updatedInvoice = invoiceService.updateInvoice(updatedDto);
         }
 
         return createinvoiceResponseModel(updatedInvoice);
