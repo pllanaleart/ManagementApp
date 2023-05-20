@@ -8,7 +8,7 @@ import com.managementapp.managementapplication.service.StockService;
 import com.managementapp.managementapplication.shared.dto.ProductsDto;
 import com.managementapp.managementapplication.shared.dto.StockDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
-import com.managementapp.managementapplication.ui.response.StockResponseList;
+import com.managementapp.managementapplication.ui.response.stockResponse.StockResponseList;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

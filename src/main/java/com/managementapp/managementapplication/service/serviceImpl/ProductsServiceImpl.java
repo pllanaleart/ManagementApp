@@ -5,7 +5,7 @@ import com.managementapp.managementapplication.repository.ProductsRepository;
 import com.managementapp.managementapplication.service.ProductsService;
 import com.managementapp.managementapplication.shared.dto.ProductsDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
-import com.managementapp.managementapplication.ui.response.ProductResponseList;
+import com.managementapp.managementapplication.ui.response.productResponse.ProductResponseList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

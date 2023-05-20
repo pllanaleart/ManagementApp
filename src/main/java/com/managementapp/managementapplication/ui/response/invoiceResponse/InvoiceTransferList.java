@@ -1,4 +1,4 @@
-package com.managementapp.managementapplication.ui.response;
+package com.managementapp.managementapplication.ui.response.invoiceResponse;
 
 import com.managementapp.managementapplication.shared.dto.InvoiceDto;
 

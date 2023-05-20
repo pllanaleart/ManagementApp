@@ -4,11 +4,8 @@ import com.managementapp.managementapplication.service.ProductsService;
 import com.managementapp.managementapplication.shared.AppConstants;
 import com.managementapp.managementapplication.shared.dto.ProductsDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
-import com.managementapp.managementapplication.ui.response.ProductResponseList;
+import com.managementapp.managementapplication.ui.response.productResponse.ProductResponseList;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("products")

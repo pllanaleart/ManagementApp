@@ -3,15 +3,17 @@ package com.managementapp.managementapplication.service.serviceImpl;
 import com.managementapp.managementapplication.embededKeys.ProductsListKey;
 import com.managementapp.managementapplication.entity.InvoiceEntity;
 import com.managementapp.managementapplication.entity.ProductsListEntity;
+import com.managementapp.managementapplication.entity.SellingsEntity;
 import com.managementapp.managementapplication.entity.StockEntity;
 import com.managementapp.managementapplication.repository.InvoiceRepository;
 import com.managementapp.managementapplication.repository.ProductsListRepository;
+import com.managementapp.managementapplication.repository.SellingsRepository;
 import com.managementapp.managementapplication.repository.StockRepository;
 import com.managementapp.managementapplication.service.InvoiceService;
 import com.managementapp.managementapplication.shared.Mapper.InvoiceMapper;
 import com.managementapp.managementapplication.shared.dto.InvoiceDto;
 import com.managementapp.managementapplication.shared.dto.ProductsListDto;
-import com.managementapp.managementapplication.ui.response.InvoiceTransferList;
+import com.managementapp.managementapplication.ui.response.invoiceResponse.InvoiceTransferList;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,20 +34,21 @@ public class InvoiceServiceImpl implements InvoiceService {
     private InvoiceRepository invoiceRepository;
     private ProductsListRepository productsListRepository;
     private StockRepository stockRepository;
+    private SellingsRepository sellingsRepository;
     ModelMapper mapper = new ModelMapper();
 
     @Autowired
-    public InvoiceServiceImpl(InvoiceRepository invoiceRepository, ProductsListRepository productsListRepository, StockRepository stockRepository) {
+    public InvoiceServiceImpl(InvoiceRepository invoiceRepository, ProductsListRepository productsListRepository, StockRepository stockRepository,SellingsRepository sellingsRepository) {
         this.invoiceRepository = invoiceRepository;
         this.productsListRepository = productsListRepository;
         this.stockRepository = stockRepository;
+        this.sellingsRepository = sellingsRepository;
     }
 
 
     @Override
     public InvoiceTransferList findAll(int page, int limit, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        List<InvoiceDto> list = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, limit, sort);
         Page<InvoiceEntity> invoiceEntitiesPage = invoiceRepository.findAll(pageable);
         List<InvoiceEntity> invoiceEntities = invoiceEntitiesPage.getContent();
@@ -67,7 +70,14 @@ public class InvoiceServiceImpl implements InvoiceService {
         } else {
             InvoiceEntity invoiceEntity = InvoiceMapper.convertToEntity(invoiceDto);
             productsListRepository.saveAll(invoiceEntity.getListEntities());
-            return InvoiceMapper.convertToDto(invoiceRepository.save(invoiceEntity));
+            InvoiceEntity createdInvoice = invoiceRepository.save(invoiceEntity);
+            SellingsEntity sellingsEntity = new SellingsEntity();
+            sellingsEntity.setDescription("shitje e produkteve");
+            sellingsEntity.setAmount(createdInvoice.getTotalForPayment());
+            sellingsEntity.setInvoiceEntity(createdInvoice);
+            sellingsEntity.setDate(createdInvoice.getDateCreated());
+            sellingsRepository.save(sellingsEntity);
+            return InvoiceMapper.convertToDto(createdInvoice);
         }
     }
 
@@ -116,6 +126,15 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
         InvoiceMapper.combineEntityWithDto(invoiceDto, foundInvoice);
         InvoiceEntity savedEntity = invoiceRepository.save(foundInvoice);
+        SellingsEntity sellingsEntity = sellingsRepository.findByInvoiceEntity(savedEntity);
+        if(sellingsEntity ==null){
+            sellingsEntity = new SellingsEntity();
+            sellingsEntity.setInvoiceEntity(savedEntity);
+            sellingsEntity.setDate(savedEntity.getDateCreated());
+            sellingsEntity.setDescription("shitje e produkteve");
+        }
+        sellingsEntity.setAmount(savedEntity.getTotalForPayment());
+        sellingsRepository.save(sellingsEntity);
         return InvoiceMapper.convertToDto(savedEntity);
     }
 

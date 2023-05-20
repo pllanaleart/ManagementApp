@@ -10,6 +10,10 @@ import com.managementapp.managementapplication.shared.dto.StockDto;
 import com.managementapp.managementapplication.ui.request.InvoiceQuantityModel;
 import com.managementapp.managementapplication.ui.request.InvoiceRequestModel;
 import com.managementapp.managementapplication.ui.response.*;
+import com.managementapp.managementapplication.ui.response.invoiceResponse.InvoiceResponseList;
+import com.managementapp.managementapplication.ui.response.invoiceResponse.InvoiceResponseModel;
+import com.managementapp.managementapplication.ui.response.invoiceResponse.InvoiceTransferList;
+import com.managementapp.managementapplication.ui.response.productResponse.PoductQuantityModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -108,8 +112,9 @@ public class InvoiceController {
 
         return createinvoiceResponseModel(updatedInvoice);
     }
+
     @DeleteMapping("/{id}")
-    OperationStatusModel deleteInvoice(@PathVariable Long id){
+    OperationStatusModel deleteInvoice(@PathVariable Long id) {
         InvoiceDto invoiceDto = invoiceService.findByInvoiceId(id);
         return invoiceService.deleteInvoice(invoiceDto);
     }

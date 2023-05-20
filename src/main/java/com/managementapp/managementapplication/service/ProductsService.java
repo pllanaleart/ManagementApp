@@ -2,9 +2,7 @@ package com.managementapp.managementapplication.service;
 
 import com.managementapp.managementapplication.shared.dto.ProductsDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
-import com.managementapp.managementapplication.ui.response.ProductResponseList;
-
-import java.util.List;
+import com.managementapp.managementapplication.ui.response.productResponse.ProductResponseList;
 
 public interface ProductsService {
 

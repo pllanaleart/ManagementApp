@@ -20,6 +20,8 @@ public class InvoiceEntity {
     @OneToMany(mappedBy = "invoiceEntity")
     private Set<ProductsListEntity> listEntities;
 
+    @OneToOne(mappedBy = "invoiceEntity")
+    private SellingsEntity sellingsEntity;
     public Long getId() {
         return id;
     }

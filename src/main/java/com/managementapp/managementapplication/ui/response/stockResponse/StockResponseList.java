@@ -1,19 +1,22 @@
-package com.managementapp.managementapplication.ui.response;
+package com.managementapp.managementapplication.ui.response.stockResponse;
 
-import com.managementapp.managementapplication.shared.dto.InvoiceDto;
-import com.managementapp.managementapplication.shared.dto.ProductsDto;
+import com.managementapp.managementapplication.shared.dto.StockDto;
 
 import java.util.List;
 
-public class InvoiceResponseList {
-    private List<InvoiceResponseModel> content;
+public class StockResponseList {
+
+    private List<StockDto> content;
     private int pageNo;
     private int pageSize;
     private Long totalElements;
     private int totalPages;
     private boolean isLast;
 
-    public InvoiceResponseList(List<InvoiceResponseModel> content, int pageNo, int pageSize, Long totalElements, int totalPages, boolean isLast) {
+    public StockResponseList() {
+    }
+
+    public StockResponseList(List<StockDto> content, int pageNo, int pageSize, Long totalElements, int totalPages, boolean isLast) {
         this.content = content;
         this.pageNo = pageNo;
         this.pageSize = pageSize;
@@ -22,14 +25,11 @@ public class InvoiceResponseList {
         this.isLast = isLast;
     }
 
-    public InvoiceResponseList() {
-    }
-
-    public List<InvoiceResponseModel> getContent() {
+    public List<StockDto> getContent() {
         return content;
     }
 
-    public void setContent(List<InvoiceResponseModel> content) {
+    public void setContent(List<StockDto> content) {
         this.content = content;
     }
 

@@ -1,14 +1,10 @@
 package com.managementapp.managementapplication.service;
 
 import com.managementapp.managementapplication.embededKeys.ProductsListKey;
-import com.managementapp.managementapplication.entity.ProductsListEntity;
 import com.managementapp.managementapplication.shared.dto.InvoiceDto;
 import com.managementapp.managementapplication.shared.dto.ProductsListDto;
-import com.managementapp.managementapplication.ui.response.InvoiceResponseList;
-import com.managementapp.managementapplication.ui.response.InvoiceTransferList;
+import com.managementapp.managementapplication.ui.response.invoiceResponse.InvoiceTransferList;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
-
-import java.util.Optional;
 
 public interface InvoiceService {
 

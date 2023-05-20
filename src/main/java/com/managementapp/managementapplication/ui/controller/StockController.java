@@ -6,7 +6,7 @@ import com.managementapp.managementapplication.shared.AppConstants;
 import com.managementapp.managementapplication.shared.dto.StockDto;
 import com.managementapp.managementapplication.ui.request.StockUpdateRequestModel;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
-import com.managementapp.managementapplication.ui.response.StockResponseList;
+import com.managementapp.managementapplication.ui.response.stockResponse.StockResponseList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

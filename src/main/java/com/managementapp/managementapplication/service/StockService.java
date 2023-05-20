@@ -2,7 +2,7 @@ package com.managementapp.managementapplication.service;
 
 import com.managementapp.managementapplication.shared.dto.StockDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
-import com.managementapp.managementapplication.ui.response.StockResponseList;
+import com.managementapp.managementapplication.ui.response.stockResponse.StockResponseList;
 
 public interface StockService {
 

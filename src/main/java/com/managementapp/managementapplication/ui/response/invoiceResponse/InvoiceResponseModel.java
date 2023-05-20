@@ -1,4 +1,6 @@
-package com.managementapp.managementapplication.ui.response;
+package com.managementapp.managementapplication.ui.response.invoiceResponse;
+
+import com.managementapp.managementapplication.ui.response.productResponse.PoductQuantityModel;
 
 import java.util.Set;
 
