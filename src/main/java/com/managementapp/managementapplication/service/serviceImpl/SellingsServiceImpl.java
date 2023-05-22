@@ -5,11 +5,18 @@ import com.managementapp.managementapplication.repository.SellingsRepository;
 import com.managementapp.managementapplication.service.SellingsService;
 import com.managementapp.managementapplication.shared.dto.SellingsDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
+import com.managementapp.managementapplication.ui.response.sellingsResponse.SellingsResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,6 +30,21 @@ public class SellingsServiceImpl implements SellingsService {
         this.sellingsRepository = sellingsRepository;
     }
 
+
+    @Override
+    public SellingsResponse findAll(int page, int limit, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, limit, sort);
+        Page<SellingsEntity> sellingsEntities = sellingsRepository.findAll(pageable);
+        List<SellingsEntity> sellingsEntityList = sellingsEntities.getContent();
+        List<SellingsDto> sellingsDtos = new ArrayList<>();
+        for(SellingsEntity sellings : sellingsEntityList){
+            sellingsDtos.add(mapper.map(sellings, SellingsDto.class));
+        }
+
+        return new SellingsResponse(sellingsDtos,page,limit, sellingsEntities.getTotalElements(),sellingsEntities.getTotalPages(),
+                sellingsEntities.isLast());
+    }
 
     @Override
     public SellingsDto findById(Long id) {

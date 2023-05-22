@@ -1,8 +1,10 @@
 package com.managementapp.managementapplication.ui.controller;
 
 import com.managementapp.managementapplication.service.SellingsService;
+import com.managementapp.managementapplication.shared.AppConstants;
 import com.managementapp.managementapplication.shared.dto.SellingsDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
+import com.managementapp.managementapplication.ui.response.sellingsResponse.SellingsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,13 @@ public class SellingsController {
     }
 
 
+    @GetMapping
+    public SellingsResponse findAll(@RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NO) int page,
+                                    @RequestParam(value = "limit", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int limit,
+                                    @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+                                    @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIR) String sortDir){
+        return sellingsService.findAll(page,limit,sortBy,sortDir);
+    }
     @GetMapping("/{id}")
     public SellingsDto findById(@PathVariable Long id){
         return sellingsService.findById(id);
