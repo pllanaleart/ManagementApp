@@ -18,6 +18,16 @@ public class ProductsEntity {
     private StockEntity stock_id;
     @OneToMany(mappedBy = "products")
     private Set<ProductsListEntity> listEntities;
+    @OneToMany(mappedBy = "products")
+    private Set<PurchaseProductEntity> purchases;
+
+    public Set<PurchaseProductEntity> getPurchases() {
+        return purchases;
+    }
+
+    public void setPurchases(Set<PurchaseProductEntity> purchases) {
+        this.purchases = purchases;
+    }
 
     public Set<ProductsListEntity> getListEntities() {
         return listEntities;

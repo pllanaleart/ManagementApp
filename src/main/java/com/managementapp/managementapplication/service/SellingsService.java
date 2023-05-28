@@ -1,6 +1,5 @@
 package com.managementapp.managementapplication.service;
 
-import com.managementapp.managementapplication.entity.SellingsEntity;
 import com.managementapp.managementapplication.shared.dto.SellingsDto;
 import com.managementapp.managementapplication.ui.response.OperationStatusModel;
 import com.managementapp.managementapplication.ui.response.sellingsResponse.SellingsResponse;
