@@ -3,6 +3,7 @@ package com.managementapp.managementapplication.shared.Mapper;
 import com.managementapp.managementapplication.entity.ProductsEntity;
 import com.managementapp.managementapplication.entity.PurchaseProductEntity;
 import com.managementapp.managementapplication.entity.PurchasesEntity;
+import com.managementapp.managementapplication.shared.dto.ProductsDto;
 import com.managementapp.managementapplication.shared.dto.PurchaseProductDto;
 import com.managementapp.managementapplication.shared.dto.PurchasesDto;
 import org.modelmapper.ModelMapper;
@@ -52,5 +53,45 @@ public class PurchaseMapper {
             purchasesEntity.setProducts(purchaseProductEntitySet);
         }
         return purchasesEntity;
+    }
+
+    public static PurchasesDto combineToDto(PurchasesDto purchasesDto, PurchasesEntity purchasesEntity){
+        Set<PurchaseProductDto> purchaseProductDtoSet = new HashSet<>();
+
+        if(purchasesEntity.getId()!= null){
+            purchasesDto.setId(purchasesEntity.getId());
+        }
+        if(purchasesEntity.getDescription() != null){
+            purchasesDto.setDescription(purchasesEntity.getDescription());
+        }
+        if(purchasesEntity.getDate() != null){
+            purchasesDto.setDate(purchasesEntity.getDate());
+        }
+        if(purchasesEntity.getBuyInvoiceNumber()!= null){
+            purchasesDto.setBuyInvoiceId(purchasesEntity.getBuyInvoiceNumber());
+        }
+        if(purchasesEntity.getProducts()!=null){
+            for (PurchaseProductEntity productEntity: purchasesEntity.getProducts()){
+                PurchaseProductDto purchaseProductDto = new PurchaseProductDto();
+                if (productEntity.getId() != null){
+                    purchaseProductDto.setId(productEntity.getId());
+                }
+                if(productEntity.getQuantity() != null){
+                    purchaseProductDto.setQuantity(productEntity.getQuantity());
+                }
+                if(productEntity.getBuyPrice() != 0){
+                    purchaseProductDto.setBuyPrice(productEntity.getBuyPrice());
+                }
+                if(productEntity.getProducts() != null){
+                    purchaseProductDto.setProductsDto(mapper.map(productEntity.getProducts(), ProductsDto.class));
+                }
+                if(productEntity.getPurchases() != null){
+                    purchaseProductDto.setPurchasesDto(mapper.map(productEntity.getPurchases(),PurchasesDto.class));
+                }
+                purchaseProductDtoSet.add(purchaseProductDto);
+            }
+            purchasesDto.setProducts(purchaseProductDtoSet);
+        }
+        return purchasesDto;
     }
 }
