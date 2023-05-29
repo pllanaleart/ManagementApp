@@ -10,10 +10,7 @@ import com.managementapp.managementapplication.ui.request.PurchaseRequestModel;
 import com.managementapp.managementapplication.ui.response.purchasesResponse.PurchaseResponseModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +27,12 @@ public class PurchasesController {
         this.purchasesService = purchasesService;
     }
 
+    @GetMapping("/{id}")
+    public PurchaseResponseModel getPurchaseById(@PathVariable Long id){
+        PurchasesDto purchasesDto = purchasesService.findPurchaseById(id);
+        PurchaseResponseModel purchaseResponseModel = PurchaseResponseMapper.createPurchaseResponseModel(purchasesDto);
+        return purchaseResponseModel;
+    }
     @PostMapping
     public PurchaseResponseModel createPurchase(@RequestBody PurchaseRequestModel purchaseRequestModel) {
         Set<PurchaseProductDto> purchaseProductDtoSet = new HashSet<>();

@@ -16,6 +16,16 @@ public class PurchasesEntity {
     private Set<PurchaseProductEntity> products;
     private Date date;
     private Long buyInvoiceNumber;
+    @OneToOne(mappedBy = "purchasesId")
+    private ExpensesEntity expensesEntity;
+
+    public ExpensesEntity getExpensesEntity() {
+        return expensesEntity;
+    }
+
+    public void setExpensesEntity(ExpensesEntity expensesEntity) {
+        this.expensesEntity = expensesEntity;
+    }
 
     public PurchasesEntity() {
         date= new Date();
