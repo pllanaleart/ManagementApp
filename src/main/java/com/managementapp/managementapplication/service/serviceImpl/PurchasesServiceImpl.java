@@ -80,4 +80,47 @@ public class PurchasesServiceImpl implements PurchasesService {
         }else throw new RuntimeException("Purchase not found");
         return returnValue;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PurchasesDto updatePurchase(PurchasesDto purchasesDto) {
+        Optional<PurchasesEntity> purchases = purchasesRepository.findById(purchasesDto.getId());
+        PurchasesEntity updatedPurchase = new PurchasesEntity();
+        Set<PurchaseProductEntity> purchaseProductEntitiesSet = new HashSet<>();
+        if(purchases.isPresent()){
+            updatedPurchase = purchases.get();
+            for (PurchaseProductEntity productEntity: updatedPurchase.getProducts()){
+                StockEntity stockEntity = stockRepository.findByProductsId(productEntity.getProducts().getId());
+                int stockQuantity = stockEntity.getQuantity()-productEntity.getQuantity().intValue();
+                stockEntity.setQuantity(stockQuantity);
+                stockRepository.save(stockEntity);
+                purchaseProductRepository.delete(productEntity);
+            }
+        }else throw new RuntimeException("No purchase found");
+        PurchaseMapper.combineToEntity(updatedPurchase, purchasesDto);
+        if (updatedPurchase.getProducts() == null) throw new RuntimeException("Invoice is blank");
+        for (PurchaseProductEntity purchaseProductEntity:updatedPurchase.getProducts()){
+            StockEntity stock = stockRepository.findByProductsId(purchaseProductEntity.getProducts().getId());
+            if (stock == null) throw new RuntimeException("Product not found in stock");
+            purchaseProductEntity.setPurchases(updatedPurchase);
+            purchaseProductEntity.setProducts(stock.getProductsEntity());
+            stock.setQuantity(stock.getQuantity() + purchaseProductEntity.getQuantity().intValue());
+            stockRepository.save(stock);
+            purchaseProductEntitiesSet.add(purchaseProductRepository.save(purchaseProductEntity));
+        }
+        updatedPurchase.setProducts(purchaseProductEntitiesSet);
+        purchasesRepository.save(updatedPurchase);
+        PurchasesDto returnValue = new PurchasesDto();
+        PurchaseMapper.combineToDto(returnValue,updatedPurchase);
+        ExpensesEntity expensesEntity = expensesRepository.findByPurchasesId(updatedPurchase);
+        if(expensesEntity == null)throw new RuntimeException("Expense not found");
+        expensesEntity.setDescription(returnValue.getDescription());
+        double totalValue = 0;
+        for (PurchaseProductDto purchaseProductDto : returnValue.getProducts()){
+            totalValue = totalValue + (purchaseProductDto.getBuyPrice()*purchaseProductDto.getQuantity());
+        }
+        expensesEntity.setTotalValue(totalValue);
+        expensesRepository.save(expensesEntity);
+        return returnValue;
+    }
 }

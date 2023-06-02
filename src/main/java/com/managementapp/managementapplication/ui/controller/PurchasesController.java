@@ -52,4 +52,32 @@ public class PurchasesController {
         PurchaseResponseModel purchaseResponseModel = PurchaseResponseMapper.createPurchaseResponseModel(createdPurchase);
         return purchaseResponseModel;
     }
+
+    @PutMapping("/{id}")
+    public PurchaseResponseModel updatePurchase(@PathVariable Long id,@RequestBody PurchaseRequestModel purchaseRequestModel){
+        Set<PurchaseProductDto> purchaseProductDtoSet = new HashSet<>();
+        PurchasesDto purchasesDto = purchasesService.findPurchaseById(id);
+        if (purchasesDto == null)throw new RuntimeException("Not found");
+        if(purchaseRequestModel.getProducts() != null) {
+            for (ProductPurchaseRequestModel productPurchaseRequestModel : purchaseRequestModel.getProducts()) {
+                PurchaseProductDto productDto = new PurchaseProductDto();
+                ProductsDto productsDto = new ProductsDto();
+                productsDto.setId(productPurchaseRequestModel.getProductId());
+                productDto.setProductsDto(productsDto);
+                productDto.setQuantity(productPurchaseRequestModel.getQuantity());
+                productDto.setBuyPrice(productPurchaseRequestModel.getBuyPrice());
+                purchaseProductDtoSet.add(productDto);
+            }
+            purchasesDto.setProducts(purchaseProductDtoSet);
+        }
+       if(purchaseRequestModel.getBuyInvoiceId() != null){
+           purchasesDto.setBuyInvoiceId(purchaseRequestModel.getBuyInvoiceId());
+       }
+       if(purchaseRequestModel.getDescription() !=null){
+           purchasesDto.setDescription(purchaseRequestModel.getDescription());
+       }
+        PurchasesDto createdPurchase = purchasesService.updatePurchase(purchasesDto);
+        PurchaseResponseModel purchaseResponseModel = PurchaseResponseMapper.createPurchaseResponseModel(createdPurchase);
+        return purchaseResponseModel;
+    }
 }
