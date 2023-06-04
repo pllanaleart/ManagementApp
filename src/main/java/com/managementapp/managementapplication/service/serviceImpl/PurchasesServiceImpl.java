@@ -10,17 +10,22 @@ import com.managementapp.managementapplication.repository.PurchasesRepository;
 import com.managementapp.managementapplication.repository.StockRepository;
 import com.managementapp.managementapplication.service.PurchasesService;
 import com.managementapp.managementapplication.shared.Mapper.PurchaseMapper;
+import com.managementapp.managementapplication.shared.Mapper.PurchaseResponseMapper;
 import com.managementapp.managementapplication.shared.dto.PurchaseProductDto;
 import com.managementapp.managementapplication.shared.dto.PurchasesDto;
+import com.managementapp.managementapplication.ui.response.purchasesResponse.PurchaseResponseModel;
+import com.managementapp.managementapplication.ui.response.purchasesResponse.PurchasesPagedResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class PurchasesServiceImpl implements PurchasesService {
@@ -36,6 +41,23 @@ public class PurchasesServiceImpl implements PurchasesService {
         this.purchaseProductRepository = purchaseProductRepository;
         this.stockRepository = stockRepository;
         this.expensesRepository = expensesRepository;
+    }
+
+    @Override
+    public PurchasesPagedResponseModel getAll(int page, int limit, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page,limit,sort);
+        Page<PurchasesEntity> purchasesEntities = purchasesRepository.findAll(pageable);
+        List<PurchasesEntity> purchasesEntityList = purchasesEntities.getContent();
+        List<PurchaseResponseModel> purchaseResponseModelList = new ArrayList<>();
+        for (PurchasesEntity purchase : purchasesEntityList) {
+            PurchasesDto purchasesDto = new PurchasesDto();
+            PurchaseMapper.combineToDto(purchasesDto,purchase);
+           PurchaseResponseModel purchaseResponseModel = PurchaseResponseMapper.createPurchaseResponseModel(purchasesDto);
+            purchaseResponseModelList.add(purchaseResponseModel);
+        }
+        return new PurchasesPagedResponseModel(purchaseResponseModelList,page,limit,purchasesEntities.getTotalElements(),
+                purchasesEntities.getTotalPages(),purchasesEntities.isLast());
     }
 
     @Override
